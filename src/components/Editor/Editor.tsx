@@ -4,17 +4,12 @@ import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
-import { $createHeadingNode, HeadingNode } from "@lexical/rich-text";
 import "./Editor.styles.css";
-import { JSX } from "react";
+import { EditorState } from "lexical";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { $createTextNode, $getRoot } from "lexical";
+import { useEffect } from "react";
 
-const theme = {
-  text: {
-    bold: "text-bold",
-  },
-};
+const theme = {};
 
 // Catch any errors that occur during Lexical updates and log them
 // or throw them as needed. If you don't throw them, Lexical will
@@ -23,21 +18,20 @@ function onError(error: Error) {
   console.error(error);
 }
 
-function MyHeadingNodePlugin(): JSX.Element {
+function MyChangeHandlerPlugin(props: {
+  onChange: (editorState: EditorState) => void;
+}) {
   const [editor] = useLexicalComposerContext();
-  return (
-    <button
-      onClick={() => {
-        editor.update(() => {
-          $getRoot().append(
-            $createHeadingNode("h1").append($createTextNode("Hello World!"))
-          );
-        });
-      }}
-    >
-      Heading
-    </button>
-  );
+  const { onChange } = props;
+  useEffect(() => {
+    return editor.registerUpdateListener(({ editorState }) => {
+      editorState.read(() => {
+        // Handle the editor state change
+        onChange(editorState);
+      });
+    });
+  }, [editor, onChange]);
+  return null;
 }
 
 export function Editor() {
@@ -45,7 +39,6 @@ export function Editor() {
     namespace: "MyEditor",
     theme,
     onError,
-    nodes: [HeadingNode],
   };
 
   return (
@@ -64,7 +57,14 @@ export function Editor() {
       />
       <HistoryPlugin />
       <AutoFocusPlugin />
-      <MyHeadingNodePlugin />
+      <MyChangeHandlerPlugin
+        onChange={(editorState) => {
+          editorState.read(() => {
+            // Handle the editor state change
+            console.log(editorState);
+          });
+        }}
+      />
     </LexicalComposer>
   );
 }
