@@ -45,7 +45,13 @@ function HeadingPlugin(): JSX.Element[] {
   };
   const headings: HeadingType[] = ["h1", "h2", "h3"];
   return headings.map((heading) => (
-    <button onClick={() => onClick(heading)} key={heading}>
+    <button
+      type="button"
+      onClick={() => {
+        onClick(heading);
+      }}
+      key={heading}
+    >
       {heading.toUpperCase()}
     </button>
   ));
@@ -65,7 +71,13 @@ function ListToolbarPlugin(): JSX.Element {
   return (
     <>
       {listTypes.map((listType) => (
-        <button onClick={() => onClick(listType)} key={listType}>
+        <button
+          type="button"
+          onClick={() => {
+            onClick(listType);
+          }}
+          key={listType}
+        >
           {listType.toUpperCase()}
         </button>
       ))}
